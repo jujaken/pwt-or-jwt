@@ -1,0 +1,49 @@
+syntax = "proto3";
+option go_package = "/auto";
+package jwt;
+
+message Header {
+    string alg = 1;
+    string typ = 2;
+}
+
+message Claim {
+    string name = 1;
+    int32 value = 2;
+}
+
+message Payload {
+    repeated Claim claims = 1;
+}
+
+message WebToken {
+    Header header = 1;
+    Payload payload = 2;
+    string signature = 3;
+}
+
+service TokenService {
+    rpc CreateWebToken(CreateRequest) returns (CreateResponse);
+    rpc VerifyWebToken(VerifyRequest) returns (VerifyResponse);
+}
+
+message CreateRequest {
+    Header header = 1;
+    Payload payload = 2;
+    string secret = 3;
+}
+
+message CreateResponse {
+    WebToken token = 1;
+    string jwt = 2;
+}
+
+message VerifyRequest {
+    string jwt = 1;
+    string secret = 2;
+}
+
+message VerifyResponse {
+    bool valid = 1;
+    string message = 2;
+}

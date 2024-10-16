@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"pwt-or-jwt/custom"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/snowmerak/pwt/gen/grpc/model/token"
@@ -36,6 +37,25 @@ func getPwtToken() string {
 	return wt
 }
 
+func commonCreation(token custom.Token) string {
+	token.AddClaim(custom.Claim{Name: "test", Value: 123})
+	t, err := token.Create(secret)
+	if err != nil {
+		panic("error during token creation")
+	}
+	return t
+}
+
+func getCustomJWTToken() string {
+	token := custom.NewJwtToken()
+	return commonCreation(token)
+}
+
+func getCustomPWTToken() string {
+	token := custom.NewPwtToken()
+	return commonCreation(token)
+}
+
 func main() {
 	jwtToken := getJwtToken()
 	fmt.Printf("JWT Token: %s\n", jwtToken)
@@ -44,4 +64,12 @@ func main() {
 	pwtToken := getPwtToken()
 	fmt.Printf("PWT Token: %s\n", pwtToken)
 	fmt.Printf("PWT Token len: %d\n", len(pwtToken))
+
+	jwtCustomToken := getCustomJWTToken()
+	fmt.Printf("Custom JWT Token: %s\n", jwtCustomToken)
+	fmt.Printf("Custom JWT Token len: %d\n", len(jwtCustomToken))
+
+	pwtCustomToken := getCustomPWTToken()
+	fmt.Printf("Custom PWT Token: %s\n", pwtCustomToken)
+	fmt.Printf("Custom PWT Token len: %d\n", len(pwtCustomToken))
 }

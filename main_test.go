@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"pwt-or-jwt/custom"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/snowmerak/pwt/gen/grpc/model/token"
 	"github.com/snowmerak/pwt/lib/pwt"
@@ -95,4 +97,51 @@ func BenchmarkPWTValidation(b *testing.B) {
 			b.Fatalf("Ошибка при верификации PWT: %v", err)
 		}
 	}
+}
+
+func commonCreation(token custom.Token, b *testing.B) {
+	token.AddClaim(custom.Claim{Name: "test", Value: 123})
+
+	for i := 0; i < b.N; i++ {
+		_, err := token.Create(secret)
+		if err != nil {
+			b.Fatalf("error during token creation: %v", err)
+		}
+	}
+}
+
+func commonValidation(token custom.Token, b *testing.B) {
+	token.AddClaim(custom.Claim{Name: "test", Value: 123})
+
+	wt, err := token.Create(secret)
+	if err != nil {
+		b.Fatalf("error during token creation: %v", err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		err := token.Verify(wt, secret)
+		if err != nil {
+			b.Fatalf("error during token validation: %v", err)
+		}
+	}
+}
+
+func BenchmarkCustomJWTCreationW(b *testing.B) {
+	token := custom.NewJwtToken()
+	commonCreation(token, b)
+}
+
+func BenchmarkCustomJWTValidation(b *testing.B) {
+	token := custom.NewJwtToken()
+	commonValidation(token, b)
+}
+
+func BenchmarkCustomPWTCreationW(b *testing.B) {
+	token := custom.NewPwtToken()
+	commonValidation(token, b)
+}
+
+func BenchmarkCustomPWTValidation(b *testing.B) {
+	token := custom.NewPwtToken()
+	commonValidation(token, b)
 }
